@@ -199,44 +199,61 @@ export class CoverPDFGenerator {
     const textColor = this.hexToRgb(this.config.textColor || '#000000');
     const front = this.layout.frontCover;
 
-    // Margins
-    const margin = 30;
-    const contentX = front.x + margin;
-    const contentWidth = front.width - margin * 2;
+    // Margins and spacing
+    const topMargin = 40;
+    const contentX = front.x + 30;
+    const contentWidth = front.width - 60;
 
-    // Title
+    // Title - positioned from top
     const titleSize = this.config.fontSize?.title || 44;
+    const titleY = front.y + front.height - topMargin;
+
     page.drawText(this.config.title, {
       x: contentX,
-      y: front.y + front.height - margin - titleSize,
+      y: titleY,
       size: titleSize,
       color: textColor,
       maxWidth: contentWidth,
     });
 
-    // Subtitle
+    // Subtitle - positioned with calculated spacing below title
     if (this.config.subtitle) {
       const subtitleSize = this.config.fontSize?.subtitle || 24;
+      // Calculate spacing: font size + extra padding for line height
+      const titleSpacing = titleSize * 1.5; // 1.5x multiplier for spacing after title
+      const subtitleY = titleY - titleSpacing - 10; // 10pt gap between elements
+
       page.drawText(this.config.subtitle, {
         x: contentX,
-        y: front.y + front.height - margin - titleSize - subtitleSize - 10,
+        y: subtitleY,
         size: subtitleSize,
         color: textColor,
         maxWidth: contentWidth,
       });
     }
 
-    // Author (bottom)
+    // Author (bottom with fixed margin)
     if (this.config.author) {
       const authorSize = this.config.fontSize?.author || 16;
+      const bottomMargin = 25;
+      const authorY = front.y + bottomMargin;
+
       page.drawText(this.config.author, {
         x: contentX,
-        y: front.y + margin + 10,
+        y: authorY,
         size: authorSize,
         color: textColor,
         maxWidth: contentWidth,
       });
     }
+  }
+
+  /**
+   * Calculate line height based on font size
+   * Used for reference in documentation
+   */
+  private calculateLineHeight(fontSize: number): number {
+    return fontSize * 1.3; // 1.3 multiplier for typical line spacing
   }
 
   private drawSpineText(page: PDFPage): void {

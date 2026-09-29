@@ -1,0 +1,17 @@
+{
+  "title": "The Complete Guide to Productivity, Time Management, and Goal Achievement in Your Personal and Professional Life",
+  "subtitle": "Proven strategies and techniques to maximize your efficiency, overcome procrastination, and achieve your dreams with confidence and clarity",
+  "author": "Your Name",
+  "description": "A comprehensive guide for success",
+  "width": 6,
+  "height": 9,
+  "pageCount": 150,
+  "backgroundColor": "#F5F5DC",
+  "textColor": "#2C3E50",
+  "coverImagePath": null,
+  "fontSize": {
+    "title": 36,
+    "subtitle": 18,
+    "author": 14
+  }
+}

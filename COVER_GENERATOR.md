@@ -22,6 +22,13 @@ Generate professional, print-ready book covers for Amazon KDP with precise dimen
 - Cover image support (PNG/JPEG)
 - Title, subtitle, and author text
 
+✅ **Smart Text Positioning**
+- **Automatic line height calculation** based on font size (1.3x multiplier)
+- **Text wrapping detection** for long titles and subtitles
+- **Dynamic spacing** between title, subtitle, and author
+- Proper vertical positioning even with multi-line text
+- Prevents text overflow and overlap
+
 ✅ **Professional Output**
 - Vector-based PDF (scalable)
 - Print-ready quality
@@ -213,14 +220,59 @@ This generates:
 - Cover PDF with spine
 - Metadata CSV for KDP listing
 
+## Text Positioning & Line Height
+
+The cover generator automatically calculates proper spacing based on font sizes:
+
+### Line Height Calculation
+
+```
+Line Height = Font Size × 1.3
+```
+
+**Example:**
+- Title (48pt) → Line height: 62.4pt
+- Subtitle (24pt) → Line height: 31.2pt
+- Author (16pt) → Line height: 20.8pt
+
+### Text Wrapping
+
+The generator estimates text lines based on:
+- Font size
+- Average character width (0.55× font size)
+- Available width on cover
+
+**Example (6" width):**
+- Title at 48pt: ~10 characters per line
+- Subtitle at 24pt: ~20 characters per line
+- Longer text automatically wraps to next line
+
+### Spacing Between Elements
+
+Default spacing:
+- Between title and subtitle: 20pt
+- Between subtitle and author: 20pt
+- Top/bottom margins: 30pt
+
+---
+
 ## Tips & Best Practices
 
 1. **Title Length**: Keep titles under 100 characters for readability
-2. **Color Contrast**: Ensure good contrast between text and background
-3. **Font Sizes**: Larger sizes (44+) work better for titles
-4. **Cover Image**: Use high-quality images at least 3000×4500px
-5. **Testing**: Download your PDF and check bleed guides in print preview
-6. **File Organization**: Store configs in `examples/` for reusability
+2. **Multi-line Titles**: Longer titles wrap automatically - no manual breaks needed
+3. **Color Contrast**: Ensure good contrast between text and background
+4. **Font Sizes**: Larger sizes (44+) work better for titles
+5. **Cover Image**: Use high-quality images at least 3000×4500px
+6. **Testing**: Download your PDF and check bleed guides in print preview
+7. **File Organization**: Store configs in `examples/` for reusability
+
+### Text Sizing Guide
+
+| Element | Recommended Size | Max Characters | Notes |
+|---------|-----------------|-----------------|-------|
+| **Title** | 36-52pt | 50-100 | Main hook, eye-catching |
+| **Subtitle** | 18-28pt | 100-200 | Descriptive, complements title |
+| **Author** | 12-18pt | 50+ | Name only recommended |
 
 ## Troubleshooting
 
