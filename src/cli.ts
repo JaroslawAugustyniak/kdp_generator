@@ -51,6 +51,40 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
+    'generate-cover <config-file>',
+    'Generate cover PDF from JSON config',
+    (yargs) => {
+      return yargs
+        .positional('config-file', {
+          describe: 'Path to cover config JSON file',
+          type: 'string',
+        })
+        .option('output', {
+          alias: 'o',
+          describe: 'Output PDF file path',
+          type: 'string',
+          default: 'cover.pdf',
+        });
+    },
+    async (argv) => {
+      try {
+        const configPath = path.resolve(argv['config-file'] as string);
+        const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+
+        // Validate specs
+        if (!generator.validateSpecs(config.width, config.height, config.pageCount)) {
+          process.exit(1);
+        }
+
+        await generator.generateCover(config, argv.output as string);
+        console.log('✓ Done!');
+      } catch (error) {
+        console.error('❌ Error:', error);
+        process.exit(1);
+      }
+    }
+  )
+  .command(
     'validate <width> <height> <page-count>',
     'Validate KDP print specifications',
     (yargs) => {
