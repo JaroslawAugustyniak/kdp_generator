@@ -1,0 +1,21 @@
+{
+  "title": "My Lined Notebook",
+  "pageCount": 100,
+  "width": 6,
+  "height": 9,
+  "pages": [
+    {
+      "contentType": "blank"
+    },
+    {
+      "contentType": "lined",
+      "paperColor": "white",
+      "lineHeight": 14,
+      "lineColor": "#CCCCCC"
+    }
+  ],
+  "marginTop": 36,
+  "marginBottom": 36,
+  "marginLeft": 36,
+  "marginRight": 36
+}

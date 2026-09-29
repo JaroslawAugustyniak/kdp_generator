@@ -1,0 +1,89 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: kdp_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - default
+
+  kdp-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kdp_api
+    working_dir: /app
+    environment:
+      VIRTUAL_HOST: api.kdp.localhost
+      VIRTUAL_PORT: 3000
+      NODE_ENV: ${NODE_ENV:-development}
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      API_PORT: 3000
+    command: node /app/dist/server.js
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - default
+      - nginx-proxy-network
+    restart: unless-stopped
+
+  kdp-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kdp_generator
+    working_dir: /app
+    volumes:
+      - ./src:/app/src
+      - ./dist:/app/dist
+      - assets_data:/app/assets
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    command: node dist/cli.js
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kdp-api:
+        condition: service_started
+    networks:
+      - default
+    restart: "no"
+
+volumes:
+  mysql_data:
+    driver: local
+  assets_data:
+    driver: local
+
+networks:
+  nginx-proxy-network:
+    external: true
+    name: nginx-proxy-network

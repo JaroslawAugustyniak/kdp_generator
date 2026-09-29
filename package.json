@@ -1,0 +1,41 @@
+{
+  "name": "kdp-generator",
+  "version": "0.1.0",
+  "description": "CLI automation tool for generating mass KDP low-content book assets (PDFs and metadata)",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "cli": "node dist/cli.js",
+    "clean": "rm -rf dist",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": [
+    "kdp",
+    "pdf",
+    "automation",
+    "notebooks",
+    "journals",
+    "openai"
+  ],
+  "author": "Jarek",
+  "license": "MIT",
+  "dependencies": {
+    "pdf-lib": "^1.17.1",
+    "openai": "^4.52.0",
+    "csv-writer": "^1.6.0",
+    "mysql2": "^3.6.5",
+    "dotenv": "^16.3.1",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.10.5",
+    "@types/yargs": "^17.0.31",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0"
+  }
+}
