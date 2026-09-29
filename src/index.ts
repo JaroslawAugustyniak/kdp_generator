@@ -57,4 +57,5 @@ export class KDPGenerator {
 
 export { InteriorPDFGenerator } from './pdf-generator/interior.js';
 export { KDPMath } from './kdp-math/index.js';
+export { MetadataGenerator, OpenAIClient, CSVExporter, PROMPTS } from './metadata/index.js';
 export * from './types/index.js';
