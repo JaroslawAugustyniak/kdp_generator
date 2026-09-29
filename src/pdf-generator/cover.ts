@@ -199,37 +199,48 @@ export class CoverPDFGenerator {
     const textColor = this.hexToRgb(this.config.textColor || '#000000');
     const front = this.layout.frontCover;
 
-    // Margins and spacing
-    const topMargin = 40;
+    // Margins and spacing (increased top margin for proper breathing room)
+    const topMargin = 80; // Increased from 40 to 80 points for better spacing
     const contentX = front.x + 30;
     const contentWidth = front.width - 60;
 
-    // Title - positioned from top
+    // Title - positioned from top with proper line height
     const titleSize = this.config.fontSize?.title || 44;
-    const titleY = front.y + front.height - topMargin;
+    const titleLineHeight = this.calculateLineHeight(titleSize);
+    const titleLines = this.wrapText(this.config.title, titleSize, contentWidth);
 
-    page.drawText(this.config.title, {
-      x: contentX,
-      y: titleY,
-      size: titleSize,
-      color: textColor,
-      maxWidth: contentWidth,
-    });
+    // Position title at calculated top margin
+    let titleY = front.y + front.height - titleSize - topMargin;
 
-    // Subtitle - positioned with calculated spacing below title
+    // Draw each title line with proper spacing
+    for (let i = 0; i < titleLines.length; i++) {
+      page.drawText(titleLines[i], {
+        x: contentX,
+        y: titleY - i * titleLineHeight,
+        size: titleSize,
+        color: textColor,
+      });
+    }
+
+    // Move down past title for subtitle
+    const titleTotalHeight = titleLines.length * titleLineHeight;
+    let subtitleStartY = titleY - titleTotalHeight - 15; // 15pt gap after title
+
+    // Subtitle - positioned with proper line height
     if (this.config.subtitle) {
       const subtitleSize = this.config.fontSize?.subtitle || 24;
-      // Calculate spacing: font size + extra padding for line height
-      const titleSpacing = titleSize * 1.5; // 1.5x multiplier for spacing after title
-      const subtitleY = titleY - titleSpacing - 10; // 10pt gap between elements
+      const subtitleLineHeight = this.calculateLineHeight(subtitleSize);
+      const subtitleLines = this.wrapText(this.config.subtitle, subtitleSize, contentWidth);
 
-      page.drawText(this.config.subtitle, {
-        x: contentX,
-        y: subtitleY,
-        size: subtitleSize,
-        color: textColor,
-        maxWidth: contentWidth,
-      });
+      // Draw each subtitle line with proper spacing
+      for (let i = 0; i < subtitleLines.length; i++) {
+        page.drawText(subtitleLines[i], {
+          x: contentX,
+          y: subtitleStartY - i * subtitleLineHeight,
+          size: subtitleSize,
+          color: textColor,
+        });
+      }
     }
 
     // Author (bottom with fixed margin)
@@ -243,17 +254,64 @@ export class CoverPDFGenerator {
         y: authorY,
         size: authorSize,
         color: textColor,
-        maxWidth: contentWidth,
       });
     }
   }
 
   /**
    * Calculate line height based on font size
-   * Used for reference in documentation
+   * 1.3x multiplier for proper line spacing
    */
   private calculateLineHeight(fontSize: number): number {
-    return fontSize * 1.3; // 1.3 multiplier for typical line spacing
+    return fontSize * 1.1;
+  }
+
+  /**
+   * Wrap text into lines based on available width
+   * Returns array of text lines that fit within maxWidth
+   */
+  private wrapText(
+    text: string,
+    fontSize: number,
+    maxWidth: number
+  ): string[] {
+    // Average character width is roughly 0.5-0.6 of font size
+    const avgCharWidth = fontSize * 0.55;
+    const charsPerLine = Math.max(1, Math.floor(maxWidth / avgCharWidth));
+
+    const words = text.split(' ');
+    const lines: string[] = [];
+    let currentLine = '';
+
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+
+      if (testLine.length <= charsPerLine) {
+        currentLine = testLine;
+      } else {
+        if (currentLine) {
+          lines.push(currentLine);
+        }
+        // Handle long words that exceed line width
+        if (word.length > charsPerLine) {
+          // Break long word into chunks
+          let remaining = word;
+          while (remaining.length > charsPerLine) {
+            lines.push(remaining.substring(0, charsPerLine));
+            remaining = remaining.substring(charsPerLine);
+          }
+          currentLine = remaining;
+        } else {
+          currentLine = word;
+        }
+      }
+    }
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
+    return lines.length > 0 ? lines : [''];
   }
 
   private drawSpineText(page: PDFPage): void {
@@ -263,12 +321,12 @@ export class CoverPDFGenerator {
     const spine = this.layout.spine;
 
     // Rotate text 90 degrees for spine
-    const fontSize = 12;
+    const fontSize = 11;
     const text = this.config.title;
 
     // Draw spine text vertically
     page.drawText(text, {
-      x: spine.x + spine.width / 2,
+      x: spine.x + spine.width - 10,
       y: spine.y + 20,
       size: fontSize,
       color: textColor,

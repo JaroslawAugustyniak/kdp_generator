@@ -11,6 +11,13 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import { KDPGenerator } from './index.js';
 import { InteriorConfig } from './types/index.js';
+import {
+  CoverGenerationPipeline,
+  OpenAIImageGenerator,
+  StabilityImageGenerator,
+  ReplicateUpscaler,
+  CoverPipelineConfig,
+} from './cover-pipeline/index.js';
 import 'dotenv/config';
 
 const generator = new KDPGenerator();
@@ -134,6 +141,70 @@ yargs(hideBin(process.argv))
           `    Size: ${(coords.width / 72).toFixed(2)}" x ${(coords.height / 72).toFixed(2)}"`
         );
       });
+    }
+  )
+  .command(
+    'generate-ai-cover <config-file>',
+    'Generate a print-ready cover PDF using the AI art + upscale + composite pipeline',
+    (yargs) => {
+      return yargs
+        .positional('config-file', {
+          describe: 'Path to AI cover pipeline config JSON file',
+          type: 'string',
+        })
+        .option('output', {
+          alias: 'o',
+          describe: 'Output PDF file path',
+          type: 'string',
+          default: 'ai-cover.pdf',
+        })
+        .option('no-cache', {
+          describe: 'Disable the on-disk art/upscale cache entirely',
+          type: 'boolean',
+          default: false,
+        })
+        .option('force-regenerate-art', {
+          describe: 'Ignore cached AI art and call the image provider again',
+          type: 'boolean',
+          default: false,
+        })
+        .option('force-regenerate-upscale', {
+          describe: 'Ignore cached upscale and call the upscaler again',
+          type: 'boolean',
+          default: false,
+        });
+    },
+    async (argv) => {
+      try {
+        const configPath = path.resolve(argv['config-file'] as string);
+        const raw = JSON.parse(readFileSync(configPath, 'utf-8'));
+
+        if (!generator.validateSpecs(raw.width, raw.height, raw.pageCount)) {
+          process.exit(1);
+        }
+
+        const imageGenerator =
+          raw.imageProvider === 'stability'
+            ? new StabilityImageGenerator()
+            : new OpenAIImageGenerator();
+
+        const config: CoverPipelineConfig = {
+          ...raw,
+          imageGenerator,
+          upscaler: new ReplicateUpscaler(),
+          outputPath: argv.output as string,
+          useCache: !(argv['no-cache'] as boolean),
+          forceRegenerateArt: argv['force-regenerate-art'] as boolean,
+          forceRegenerateUpscale: argv['force-regenerate-upscale'] as boolean,
+        };
+
+        const pipeline = new CoverGenerationPipeline(config);
+        await pipeline.generate();
+        console.log('✓ Done!');
+      } catch (error) {
+        console.error('❌ Error:', error);
+        process.exit(1);
+      }
     }
   )
   .demandCommand()

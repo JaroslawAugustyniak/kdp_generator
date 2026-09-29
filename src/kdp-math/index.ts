@@ -21,6 +21,16 @@ export interface InteriorDimensions {
   pageCount: number;
 }
 
+export interface CoverPixelDimensions {
+  widthPx: number;
+  heightPx: number;
+  frontCoverWidthPx: number;
+  spineWidthPx: number;
+  backCoverWidthPx: number;
+  bleedPx: number;
+  dpi: number;
+}
+
 const BLEED_SIZE = 0.125; // inches
 const SPINE_MULTIPLIER = 0.002252; // inches per page (for standard white paper)
 const POINTS_PER_INCH = 72;
@@ -119,6 +129,31 @@ export class KDPMath {
         width: frontWidthPts,
         height: this.inchesToPoints(interiorHeightInches),
       },
+    };
+  }
+
+  /**
+   * Calculate full cover pixel dimensions at a given DPI (default 300, KDP's print minimum).
+   * Used to size AI-generated art before compositing so print output meets resolution requirements.
+   */
+  static getCoverPixelDimensions(
+    interiorWidthInches: number,
+    interiorHeightInches: number,
+    pageCount: number,
+    dpi: number = 300
+  ): CoverPixelDimensions {
+    const spineWidthInches = this.calculateSpineWidth(pageCount);
+    const totalWidthInches = interiorWidthInches + spineWidthInches + interiorWidthInches + 2 * BLEED_SIZE;
+    const totalHeightInches = interiorHeightInches + 2 * BLEED_SIZE;
+
+    return {
+      widthPx: Math.round(totalWidthInches * dpi),
+      heightPx: Math.round(totalHeightInches * dpi),
+      frontCoverWidthPx: Math.round(interiorWidthInches * dpi),
+      spineWidthPx: Math.round(spineWidthInches * dpi),
+      backCoverWidthPx: Math.round(interiorWidthInches * dpi),
+      bleedPx: Math.round(BLEED_SIZE * dpi),
+      dpi,
     };
   }
 

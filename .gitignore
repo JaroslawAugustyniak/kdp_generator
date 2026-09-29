@@ -13,3 +13,4 @@ assets/
 *.csv
 .npm
 .env.production
+.cache/

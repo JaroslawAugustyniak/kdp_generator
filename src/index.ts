@@ -75,3 +75,4 @@ export { CoverPDFGenerator, type CoverGeneratorConfig } from './pdf-generator/co
 export { KDPMath } from './kdp-math/index.js';
 export { MetadataGenerator, OpenAIClient, CSVExporter, PROMPTS } from './metadata/index.js';
 export * from './types/index.js';
+export * from './cover-pipeline/index.js';
